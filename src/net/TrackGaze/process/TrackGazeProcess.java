@@ -54,7 +54,7 @@ public class TrackGazeProcess {
         entryLoop = new ASysThread("entryLoop");
         entryLoop.loop("entryLoop", () -> {
             while (!entries.isEmpty()) {
-                process(entries.removeFirst());
+                output(process(entries.removeFirst()));
             }
             if (!TrackGaze.isRunning()) entryLoop.stop();
             if (entries.isEmpty()) ASysUtil.threadSleep(100);
@@ -64,7 +64,7 @@ public class TrackGazeProcess {
      * Processes the given log entry. Formatting it, ready for output.
      * @param entry The log entry to be processed.
      */
-    private static void process(LogEntry entry) {
+    private static String process(LogEntry entry) {
         StringBuilder output = new StringBuilder();
 
         output.append("[").append(entry.severity()).append("]");
@@ -103,7 +103,7 @@ public class TrackGazeProcess {
 
         output.append(" ").append(entry.message());
 
-        output(new String(output));
+        return new String(output);
     }
 
     /**
