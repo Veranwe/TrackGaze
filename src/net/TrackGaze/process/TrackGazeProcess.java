@@ -4,7 +4,6 @@ import net.aSysSync.ASysThread;
 import net.aSysSync.ASysUtil;
 import net.boxes.BoxList;
 import src.net.TrackGaze.TrackGaze;
-import src.net.TrackGaze.config.TrackGazeConfig;
 import src.net.TrackGaze.log.LogEntry;
 import src.net.TrackGaze.log.LogGroup;
 import src.net.TrackGaze.log.TrackGazeSeverity;
@@ -13,6 +12,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class TrackGazeProcess {
 
@@ -26,7 +26,7 @@ public class TrackGazeProcess {
      */
     private static ASysThread entryLoop;
 
-    private static File file;
+    private static File file = new File(TrackGaze.config.getFilePath() + "latestLog.txt");
 
     /**
      * Putting together all the wanted information. Once done it adds it to the log entry queue.
@@ -53,8 +53,8 @@ public class TrackGazeProcess {
     public static void run() {
         entryLoop = new ASysThread("entryLoop");
         entryLoop.loop("entryLoop", () -> {
-            for (LogEntry entry : entries.getArray(new LogEntry[entries.size()])) {
-                process(entry);
+            while (!entries.isEmpty()) {
+                process(entries.removeFirst());
             }
             if (!TrackGaze.isRunning()) entryLoop.stop();
             if (entries.isEmpty()) ASysUtil.threadSleep(100);
@@ -67,7 +67,7 @@ public class TrackGazeProcess {
     private static void process(LogEntry entry) {
         StringBuilder output = new StringBuilder();
 
-        output.append(entry.severity()).append("-");
+        output.append("[").append(entry.severity()).append("]");
 
         // DateTime configs
         if (TrackGaze.config.showTime()) {
@@ -75,14 +75,11 @@ public class TrackGazeProcess {
 
             LocalDateTime dateTime = entry.time();
 
-            if (TrackGaze.config.showDay()) output.append(dateTime.getYear()).append("/")
-                    .append(dateTime.getMonthValue()).append("/")
-                    .append(dateTime.getDayOfMonth()).append("-");
+            if (TrackGaze.config.showDay())
+                output.append(dateTime.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"))).append("-");
 
 
-            output.append(dateTime.getHour()).append(":")
-                    .append(dateTime.getMinute()).append(":")
-                    .append(dateTime.getSecond());
+            output.append(dateTime.format(DateTimeFormatter.ofPattern("HH:mm:ss")));
 
             output.append("]");
         }
@@ -91,7 +88,8 @@ public class TrackGazeProcess {
         if (TrackGaze.config.showGroup()) {
             output.append("[");
 
-            if (TrackGaze.config.showPath()) output.append(entry.group().groupPath).append(".");
+            if (TrackGaze.config.showPath()) output.append(entry.group().groupPath)
+                    .append(entry.group().groupPath.isEmpty() ? "" : ".");
 
             output.append(entry.group().name);
 
@@ -103,7 +101,7 @@ public class TrackGazeProcess {
         // Name config
         if (TrackGaze.config.showName()) output.append("[").append(entry.name()).append("]");
 
-        output.append(entry.message());
+        output.append(" ").append(entry.message());
 
         output(new String(output));
     }
@@ -154,5 +152,9 @@ public class TrackGazeProcess {
         for (TrackGazeCustom customOutput : TrackGaze.getOutputRegistry().getArray(new TrackGazeCustom[TrackGaze.getOutputRegistry().size()])) {
             customOutput.output(message);
         }
+    }
+
+    public static boolean isEmpty() {
+        return entries.isEmpty();
     }
 }

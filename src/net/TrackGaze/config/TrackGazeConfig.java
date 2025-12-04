@@ -32,7 +32,7 @@ public class TrackGazeConfig {
      * File related settings.
      */
     private boolean outputToFile = true;
-    private String filePath = "logs";
+    private String filePath = "logs/";
 
 
 

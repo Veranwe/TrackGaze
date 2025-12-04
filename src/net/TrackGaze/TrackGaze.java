@@ -1,5 +1,6 @@
 package src.net.TrackGaze;
 
+import net.aSysSync.ASysUtil;
 import net.boxes.BoxList;
 import src.net.TrackGaze.config.TrackGazeConfig;
 import src.net.TrackGaze.log.Log;
@@ -7,6 +8,7 @@ import src.net.TrackGaze.log.LogGroup;
 import src.net.TrackGaze.process.TrackGazeCustom;
 import src.net.TrackGaze.process.TrackGazeProcess;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -60,8 +62,14 @@ public class TrackGaze {
      * Compresses the latest log file into a gzip file.
      */
     private static void compressFile() {
+        if (!config.outputToFile()) return;
+
         String compressedName = "LOG-" + LocalDateTime.now().format(
-                DateTimeFormatter.ofPattern("yyyy/MM/dd-HH:mm:ss'XXX")) + ".txt.zip";
+                DateTimeFormatter.ofPattern("yyyy.MM.dd-HH:mm:ss")) + ".txt.zip";
+
+        while (!TrackGazeProcess.isEmpty()) {
+            ASysUtil.threadSleep(100);
+        }
 
         try (
             FileInputStream inputStream = new FileInputStream(config.getFilePath() + "latestLog.txt");
@@ -74,6 +82,8 @@ public class TrackGaze {
             while ((len = inputStream.read(buffer)) != -1) {
                 gzipOutputStream.write(buffer, 0, len);
             }
+
+            new File(config.getFilePath() + "latestLog.txt").delete();
         } catch (IOException e) {
             throw new RuntimeException("Failed to compress logs file.", e);
         }
