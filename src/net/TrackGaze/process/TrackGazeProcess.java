@@ -2,7 +2,6 @@ package src.net.TrackGaze.process;
 
 import net.aSysSync.ASysThread;
 import net.aSysSync.ASysUtil;
-import net.boxes.BoxList;
 import src.net.TrackGaze.TrackGaze;
 import src.net.TrackGaze.log.LogEntry;
 import src.net.TrackGaze.log.LogGroup;
@@ -13,13 +12,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 
 public class TrackGazeProcess {
 
     /**
      * A queue of log entries ready to be processed.
      */
-    private static final BoxList<LogEntry> entries = new BoxList<>();
+    private static final ArrayList<LogEntry> entries = new ArrayList<>();
 
     /**
      * The async loop that processes entries in the queue;
@@ -149,7 +149,7 @@ public class TrackGazeProcess {
      * @param message The processed log message.
      */
     private static void outCustom(String message) {
-        for (TrackGazeCustom customOutput : TrackGaze.getOutputRegistry().getArray(new TrackGazeCustom[TrackGaze.getOutputRegistry().size()])) {
+        for (TrackGazeCustom customOutput : TrackGaze.getOutputRegistry().toArray(new TrackGazeCustom[0])) {
             customOutput.output(message);
         }
     }

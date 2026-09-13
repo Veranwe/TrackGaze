@@ -1,7 +1,6 @@
 package src.net.TrackGaze;
 
 import net.aSysSync.ASysUtil;
-import net.boxes.BoxList;
 import src.net.TrackGaze.config.TrackGazeConfig;
 import src.net.TrackGaze.log.Log;
 import src.net.TrackGaze.log.LogGroup;
@@ -14,6 +13,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.zip.GZIPOutputStream;
 
 public class TrackGaze {
@@ -25,7 +25,7 @@ public class TrackGaze {
     /**
      * The output registry for custom outputs.
      */
-    private static final BoxList<TrackGazeCustom> outputRegistry = new BoxList<>();
+    private static final ArrayList<TrackGazeCustom> outputRegistry = new ArrayList<>();
 
     public static final LogGroup rootGroup = new LogGroup(null, "root");
 
@@ -98,7 +98,7 @@ public class TrackGaze {
      * A getter to allow the system to read the registered outputs.
      * @return the output registry.
      */
-    public static BoxList<TrackGazeCustom> getOutputRegistry() { return outputRegistry; }
+    public static ArrayList<TrackGazeCustom> getOutputRegistry() { return outputRegistry; }
     /**
      * A getter to allow the system to check if it is in running mode.
      * @return if the system is running.
